@@ -127,7 +127,7 @@ def like():
                         postData = buf.getvalue()
                         buf.close()
                         if postData == '''{"status":"OK","message":"LIKED"}''':
-                            print "You liked image "+imageid+"!"
+                            print "You liked #"+tag+" image "+imageid+"!"
                             repeat = False
                         else:
                             print "Your account has been rated.  Sleeping..."

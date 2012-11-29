@@ -8,7 +8,7 @@ import time
 
 username = "username"
 password = "password"
-tag = "instagood"
+hashtags = ["love","instagood","me","cute","photooftheday","tbt","instamood","iphonesia","picoftheday","igers","girl","beautiful","instadaily","tweegram","summer","instagramhub","follow","bestoftheday","iphoneonly","igdaily","happy","picstitch","webstagram","fashion","sky","nofilter","jj","followme","fun","smile","sun","pretty","instagramers","food","like","friends","lol","hair","nature","swag","onedirection","bored","funny","life","cool","beach","blue","dog","pink","art","hot","my","family","sunset","photo","versagram","instahub","amazing","statigram","girls","cat","awesome","throwbackthursday","repost","clouds","baby","red","music","party","black","instalove","night","textgram","followback","all_shots","jj_forum","igaddict","yummy","white","yum","bestfriend","green","school","likeforlike","eyes","sweet","instago","tagsforlikes","style","harrystyles","2012","foodporn","beauty","ignation","niallhoran","i","boy","nice","halloween","instacollage"]
 
 def login():
     try:
@@ -59,7 +59,7 @@ def login():
 
     buf = cStringIO.StringIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, "https://instagram.com"+postaction[0])
+    c.setopt(pycurl.URL, "https://instagram.com"+postaction[0])
     c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
     c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
     c.setopt(pycurl.WRITEFUNCTION, buf.write)
@@ -79,52 +79,59 @@ def login():
 
 
 def like():
-    nextpage = "http://web.stagram.com/tag/"+tag+"/?vm=list"
-    #enter infinite poke loop
-    while nextpage != False:
-        buf = cStringIO.StringIO()
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, nextpage)
-        c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-        c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-        c.setopt(pycurl.WRITEFUNCTION, buf.write)
-        c.setopt(pycurl.FOLLOWLOCATION, 1)
-        c.setopt(pycurl.ENCODING, "")
-        c.setopt(pycurl.USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6 (.NET CLR 3.5.30729)")
-        c.perform()
-        curlData = buf.getvalue()
-        buf.close()
+    for tag in hashtags:
+        nextpage = "http://web.stagram.com/tag/"+tag+"/?vm=list"
+        #enter infinite poke loop
+        while nextpage != False:
+            buf = cStringIO.StringIO()
+            c = pycurl.Curl()
+            c.setopt(pycurl.URL, nextpage)
+            c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
+            c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
+            c.setopt(pycurl.WRITEFUNCTION, buf.write)
+            c.setopt(pycurl.FOLLOWLOCATION, 1)
+            c.setopt(pycurl.ENCODING, "")
+            c.setopt(pycurl.USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6 (.NET CLR 3.5.30729)")
+            c.perform()
+            curlData = buf.getvalue()
+            buf.close()
 
-        nextpagelink = re.findall(ur"<a href=\"([^\"]*)\" rel=\"next\">Earlier<\/a>",curlData)
-        if len(nextpagelink)>0:
-            nextpage = "http://web.stagram.com"+nextpagelink[0]
-        else:
-            nextpage = False
+            nextpagelink = re.findall(ur"<a href=\"([^\"]*)\" rel=\"next\">Earlier<\/a>",curlData)
+            if len(nextpagelink)>0:
+                nextpage = "http://web.stagram.com"+nextpagelink[0]
+            else:
+                nextpage = False
 
-        likedata = re.findall(ur"<span class=\"like_button\" id=\"like_button_([^\"]*)\">",curlData)
-        if len(likedata)>0:
-            for imageid in likedata:
-                randomint = random.randint(1000,9999)
+            likedata = re.findall(ur"<span class=\"like_button\" id=\"like_button_([^\"]*)\">",curlData)
+            if len(likedata)>0:
+                for imageid in likedata:
+                    repeat = True
+                    while repeat:
+                        randomint = random.randint(1000,9999)
 
-                postdata = 'pk='+imageid+'&t='+str(randomint)
-                buf = cStringIO.StringIO()
-                c = pycurl.Curl()
-                c.setopt(c.URL, "http://web.stagram.com/do_like/")
-                c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-                c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-                c.setopt(pycurl.WRITEFUNCTION, buf.write)
-                c.setopt(pycurl.FOLLOWLOCATION, 1)
-                c.setopt(pycurl.ENCODING, "")
-                c.setopt(pycurl.USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6 (.NET CLR 3.5.30729)")
-                c.setopt(pycurl.POST, 1)
-                c.setopt(pycurl.POSTFIELDS, postdata)
-                c.setopt(pycurl.POSTFIELDSIZE, len(postdata))
-                #c.setopt(pycurl.VERBOSE, True)
-                c.perform()
-                curlData = buf.getvalue()
-                buf.close()
-                print "You liked image "+imageid+"!"
-
+                        postdata = 'pk='+imageid+'&t='+str(randomint)
+                        buf = cStringIO.StringIO()
+                        c = pycurl.Curl()
+                        c.setopt(pycurl.URL, "http://web.stagram.com/do_like/")
+                        c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
+                        c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
+                        c.setopt(pycurl.WRITEFUNCTION, buf.write)
+                        c.setopt(pycurl.FOLLOWLOCATION, 1)
+                        c.setopt(pycurl.ENCODING, "")
+                        c.setopt(pycurl.USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6 (.NET CLR 3.5.30729)")
+                        c.setopt(pycurl.POST, 1)
+                        c.setopt(pycurl.POSTFIELDS, postdata)
+                        c.setopt(pycurl.POSTFIELDSIZE, len(postdata))
+                        #c.setopt(pycurl.VERBOSE, True)
+                        c.perform()
+                        postData = buf.getvalue()
+                        buf.close()
+                        if postData == '''{"status":"OK","message":"LIKED"}''':
+                            print "You liked image "+imageid+"!"
+                            repeat = False
+                        else:
+                            print "Your account has been rated.  Sleeping..."
+                            time.sleep(60)
 
 def main():
     login()

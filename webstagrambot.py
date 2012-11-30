@@ -80,6 +80,7 @@ def login():
 
 def like():
     likecount = 0
+    sleepcount = 0
     for tag in hashtags:
         nextpage = "http://web.stagram.com/tag/"+tag+"/?vm=list"
         #enter infinite poke loop
@@ -128,10 +129,10 @@ def like():
                         postData = buf.getvalue()
                         buf.close()
                         if postData == '''{"status":"OK","message":"LIKED"}''':
+                            likecount += 1
                             print "You liked #"+tag+" image "+imageid+"! Like count: "+str(likecount)
                             repeat = False
                             sleepcount = 0
-                            likecount += 1
                         else:
                             sleepcount += 1
                             print "Your account has been rated. Sleeping on "+tag+" for "+str(sleepcount)+" minute(s). Liked "+str(likecount)+" photo(s)..."

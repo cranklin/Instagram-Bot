@@ -70,6 +70,8 @@ def login():
     c.setopt(pycurl.WRITEFUNCTION, buf.write)
     c.setopt(pycurl.FOLLOWLOCATION, 1)
     c.setopt(pycurl.ENCODING, "")
+    c.setopt(pycurl.SSL_VERIFYPEER, 0)
+    c.setopt(pycurl.SSL_VERIFYHOST, 0)
     useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
     c.setopt(pycurl.USERAGENT, useragent)
     c.perform()
@@ -90,6 +92,8 @@ def login():
     c.setopt(pycurl.WRITEFUNCTION, buf.write)
     c.setopt(pycurl.FOLLOWLOCATION, 1)
     c.setopt(pycurl.ENCODING, "")
+    c.setopt(pycurl.SSL_VERIFYPEER, 0)
+    c.setopt(pycurl.SSL_VERIFYHOST, 0)
     useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
     c.setopt(pycurl.USERAGENT, useragent)
     c.perform()
@@ -144,6 +148,8 @@ def like():
             c.setopt(pycurl.WRITEFUNCTION, buf.write)
             c.setopt(pycurl.FOLLOWLOCATION, 1)
             c.setopt(pycurl.ENCODING, "")
+            c.setopt(pycurl.SSL_VERIFYPEER, 0)
+            c.setopt(pycurl.SSL_VERIFYHOST, 0)
             useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
             c.setopt(pycurl.USERAGENT, useragent)
             c.perform()
@@ -173,6 +179,8 @@ def like():
                         c.setopt(pycurl.WRITEFUNCTION, buf.write)
                         c.setopt(pycurl.FOLLOWLOCATION, 1)
                         c.setopt(pycurl.ENCODING, "")
+                        c.setopt(pycurl.SSL_VERIFYPEER, 0)
+                        c.setopt(pycurl.SSL_VERIFYHOST, 0)
                         useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
                         c.setopt(pycurl.USERAGENT, useragent)
                         c.setopt(pycurl.POST, 1)

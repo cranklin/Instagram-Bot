@@ -166,6 +166,7 @@ def like():
             if len(likedata)>0:
                 for imageid in likedata:
                     if hashtaglikelimit > 0 and hashtaglikes >= hashtaglikelimit:
+                        break
                     repeat = True
                     while repeat:
                         randomint = random.randint(1000,9999)

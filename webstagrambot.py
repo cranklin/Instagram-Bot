@@ -17,7 +17,7 @@ Instructions:
 - make sure you have the correct version of Python installed
 - make sure you have the pycurl library installed
 - log into web.stagram.com with your instagram account and approve the app
-- edit between lines 33 and 48
+- edit between lines 42 and 52
 - from the command line, run "python webstagram.py"
 - enjoy!
 

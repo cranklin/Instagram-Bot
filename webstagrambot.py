@@ -6,203 +6,233 @@ Cranklin's Instagram Bot v.1.0
 Check www.cranklin.com for updates
 
 
-This bot gets you more likes and followers on your Instagram account.  
+This bot gets you more likes and followers on your Instagram account.
 
 Requirements:
-- python > 2.6 but < 3.0
-- pycurl library
-- web.stagram.com login prior to using the bot
+    - python > 2.6 but < 3.0
+    - pycurl library
+    - web.stagram.com login prior to using the bot
 
-Instructions:
-- make sure you have the correct version of Python installed
-- make sure you have the pycurl library installed
-- log into web.stagram.com with your instagram account and approve the app
-- edit between lines 42 and 52
-- from the command line, run "python webstagram.py"
-- enjoy!
+    Instructions:
+        - make sure you have the correct version of Python installed
+        - make sure you have the pycurl library installed
+        - log into web.stagram.com with your instagram account and approve the app
+        - edit between lines 42 and 52
+        - from the command line, run "python webstagram.py"
+        - enjoy!
 
-v1.0 updates:
-- added browser agent randomizer
-- added optional sleep timer 
-- added optional hashtag limiter
-- added a couple extra additions for some people experiencing SSL errors.  (thanks Charlie)
-*** thank you Nick, John, Max, Shahar, Charlie for the help
+    v1.0 updates:
+        - added browser agent randomizer
+        - added optional sleep timer
+        - added optional hashtag limiter
+        - added a couple extra additions for some people experiencing SSL errors. (thanks Charlie)
+        *** thank you Nick, John, Max, Shahar, Charlie for the help
 '''
 
 import os
 import pycurl
 import cStringIO
 import re
-import random
+import random as r
 import time
+
 
 ##### EDIT THESE BELOW
 
-# your instagram username and password
-username = "username"
-password = "password"
+# your instagram username and password instagram
+username = ""
+password = ""
 
-#set a sleep timer between each like.  Set value to 0 if you don't want it to sleep at all
-sleeptimer = 5
+# replaced the list of hashtags as it is a pain to add new hashtags!
+# name of the config file where you have your hashtags
+hashTagFile = "config.txt"
 
-#set a like limit per hashtag.  Set value to 0 if you don't want a limit
-hashtaglikelimit = 100
+# set a sleep timer between each like.  Set value to 0 if you don't want it to sleep at all
+sleepTimer = 10
 
-#your list of hashtags
-hashtags = ["love","instagood","me","cute","photooftheday","tbt","instamood","iphonesia","picoftheday","igers","girl","beautiful","instadaily","tweegram","summer","instagramhub","follow","bestoftheday","iphoneonly","igdaily","happy","picstitch","webstagram","fashion","sky","nofilter","jj","followme","fun","smile","sun","pretty","instagramers","food","like","friends","lol","hair","nature","swag","onedirection","bored","funny","life","cool","beach","blue","dog","pink","art","hot","my","family","sunset","photo","versagram","instahub","amazing","statigram","girls","cat","awesome","throwbackthursday","repost","clouds","baby","red","music","party","black","instalove","night","textgram","followback","all_shots","jj_forum","igaddict","yummy","white","yum","bestfriend","green","school","likeforlike","eyes","sweet","instago","tagsforlikes","style","harrystyles","2012","foodporn","beauty","ignation","niallhoran","i","boy","nice","halloween","instacollage"]
+# max number of likes before going to sleep for an hour
+maxLikes = 140
+
+# set a like limit per hashtag.  Set value to 0 if you don't want a limit
+hashTagLikeLimit = 0
 
 ##### NO NEED TO EDIT BELOW THIS LINE
 
+# for user agent strings
 browsers = ["IE ","Mozilla/","Gecko/","Opera/","Chrome/","Safari/"]
-operatingsystems = ["Windows","Linux","OS X","compatible","Macintosh","Intel"]
+operatingSystems = ["Windows","Linux","OS X","compatible","Macintosh","Intel"]
+
 
 def login():
+    """
+        login using pycurl    
+    """
     try:
         os.remove("pycookie.txt")
     except:
         pass
 
-    buf = cStringIO.StringIO()
-    c = pycurl.Curl()
-    c.setopt(pycurl.URL, "http://web.stagram.com")
-    c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-    c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-    c.setopt(pycurl.WRITEFUNCTION, buf.write)
-    c.setopt(pycurl.FOLLOWLOCATION, 1)
-    c.setopt(pycurl.ENCODING, "")
-    c.setopt(pycurl.SSL_VERIFYPEER, 0)
-    c.setopt(pycurl.SSL_VERIFYHOST, 0)
-    useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
-    c.setopt(pycurl.USERAGENT, useragent)
-    c.perform()
-    curlData = buf.getvalue()
-    buf.close()
+    # Request one to web.stagram.com
+    webstagramRequest = sendRequest("http://web.stagram.com", "pycookie.txt", 1, "", 0, 0)
 
-    clientid = re.findall(ur"href=\"https:\/\/api.instagram.com\/oauth\/authorize\/\?client_id=([a-z0-9]*)&redirect_uri=http:\/\/web.stagram.com\/&response_type=code&scope=likes\+comments\+relationships\">LOG IN",curlData)
-    instagramlink = re.findall(ur"href=\"([^\"]*)\">LOG IN",curlData)
+    # Anyone want to refactor this stuff!?!?
+    insaneRegEx1 = ur"href=\"https:\/\/api.instagram.com\/oauth\/authorize\/\?client_id=([a-z0-9]*)&redirect_uri=http:\/\/web.stagram.com\/&response_type=code&scope=likes\+comments\+relationships\">LOG IN"
+    insaneRegEx2 = ur"href=\"([^\"]*)\">LOG IN"
 
+    clientId = re.findall(insaneRegEx1, webstagramRequest)
+    instagramLink = re.findall(insaneRegEx2, webstagramRequest)
 
+    # Request two to instagram.com
+    instagramLinkRequest = sendRequest(instagramLink[0], "pycookie.txt", 1, "", 0, 0)
 
+    insaneRegEx3 = ur"action=\"([^\"]*)\""
+    insaneReqEx4 = ur"name=\"csrfmiddlewaretoken\" value=\"([^\"]*)\""
 
-    buf = cStringIO.StringIO()
-    c = pycurl.Curl()
-    c.setopt(pycurl.URL, instagramlink[0])
-    c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-    c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-    c.setopt(pycurl.WRITEFUNCTION, buf.write)
-    c.setopt(pycurl.FOLLOWLOCATION, 1)
-    c.setopt(pycurl.ENCODING, "")
-    c.setopt(pycurl.SSL_VERIFYPEER, 0)
-    c.setopt(pycurl.SSL_VERIFYHOST, 0)
-    useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
-    c.setopt(pycurl.USERAGENT, useragent)
-    c.perform()
-    curlData = buf.getvalue()
-    buf.close()
+    postAction = re.findall(insaneRegEx3, instagramLinkRequest)
+    csrfMiddlewareToken = re.findall(insaneReqEx4, instagramLinkRequest)
 
-    postaction = re.findall(ur"action=\"([^\"]*)\"",curlData)
-    csrfmiddlewaretoken = re.findall(ur"name=\"csrfmiddlewaretoken\" value=\"([^\"]*)\"",curlData)
+    postData = "csrfmiddlewaretoken={csrfToken}&username={uname}&password={pword}".format(csrfToken = csrfMiddlewareToken[0], 
+                                                                                          uname     = username,
+                                                                                          pword     = password)
 
-
-
-
-
-    postdata = 'csrfmiddlewaretoken='+csrfmiddlewaretoken[0]+'&username='+username+'&password='+password
-
-    buf = cStringIO.StringIO()
-    c = pycurl.Curl()
-    c.setopt(pycurl.URL, "https://instagram.com"+postaction[0])
-    c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-    c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-    c.setopt(pycurl.WRITEFUNCTION, buf.write)
-    c.setopt(pycurl.FOLLOWLOCATION, 1)
-    c.setopt(pycurl.ENCODING, "")
-    c.setopt(pycurl.SSL_VERIFYPEER, 0)
-    c.setopt(pycurl.SSL_VERIFYHOST, 0)
-    c.setopt(pycurl.REFERER, "https://instagram.com/accounts/login/?next=/oauth/authorize/%3Fclient_id%3D"+clientid[0]+"%26redirect_uri%3Dhttp%3A//web.stagram.com/%26response_type%3Dcode%26scope%3Dlikes%2Bcomments%2Brelationships")
-    useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
-    c.setopt(pycurl.USERAGENT, useragent)
-    c.setopt(pycurl.POST, 1)
-    c.setopt(pycurl.POSTFIELDS, postdata)
-    c.setopt(pycurl.POSTFIELDSIZE, len(postdata))
-    #c.setopt(pycurl.VERBOSE, True)
-    c.perform()
-    curlData = buf.getvalue()
-    buf.close()
-
+    insaneUrl = "https://instagram.com/accounts/login/?next=/oauth/authorize/%3Fclient_id%3D" + clientId[0] + "%26redirect_uri%3Dhttp%3A//web.stagram.com/%26response_type%3Dcode%26scope%3Dlikes%2Bcomments%2Brelationships"
+    finalRequest = sendReferRequest("https://instagram.com" + postAction[0], "pycookie.txt", 1, "", 0, 0, insaneUrl, 1, postData, len(postData))
 
 
 def like():
-    likecount = 0
-    sleepcount = 0
-    for tag in hashtags:
-        hashtaglikes = 0
-        nextpage = "http://web.stagram.com/tag/"+tag+"/?vm=list"
-        #enter hashtag like loop
-        while nextpage != False and (hashtaglikelimit == 0 or (hashtaglikelimit > 0 and hashtaglikes < hashtaglikelimit)):
-            buf = cStringIO.StringIO()
-            c = pycurl.Curl()
-            c.setopt(pycurl.URL, nextpage)
-            c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-            c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-            c.setopt(pycurl.WRITEFUNCTION, buf.write)
-            c.setopt(pycurl.FOLLOWLOCATION, 1)
-            c.setopt(pycurl.ENCODING, "")
-            c.setopt(pycurl.SSL_VERIFYPEER, 0)
-            c.setopt(pycurl.SSL_VERIFYHOST, 0)
-            useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
-            c.setopt(pycurl.USERAGENT, useragent)
-            c.perform()
-            curlData = buf.getvalue()
-            buf.close()
+    """
+        like a random instagram photo which contains a hashtag from config.txt
+    """
+    likeCount = 0
+    sleepCount = 0
+    for tag in getHashTags(hashTagFile):
+        hashTagLikes = 0
+        nextPage = "http://web.stagram.com/tag/"+ tag + "/?vm=list"
 
-            nextpagelink = re.findall(ur"<a href=\"([^\"]*)\" rel=\"next\">Earlier<\/a>",curlData)
-            if len(nextpagelink)>0:
-                nextpage = "http://web.stagram.com"+nextpagelink[0]
+        while nextPage and (hashTagLikeLimit == 0 or (hashTagLikeLimit > 0 and hashTagLikes < hashTagLikeLimit)):
+
+            req = sendRequest(nextPage, "pycookie.txt", 1, "", 0, 0)
+
+            anotherRegEx1 = ur"<a href=\"([^\"]*)\" rel=\"next\">Earlier<\/a>"
+            nextPageLink = re.findall(anotherRegEx1, req)
+            
+            if len(nextPageLink) > 0:
+                nextPage = "http://web.stagram.com" + nextPageLink[0]
             else:
-                nextpage = False
+                nextPage = False
 
-            likedata = re.findall(ur"<span class=\"like_button\" id=\"like_button_([^\"]*)\">",curlData)
-            if len(likedata)>0:
-                for imageid in likedata:
-                    if hashtaglikelimit > 0 and hashtaglikes >= hashtaglikelimit:
+            anotherRegEx2 = ur"<span class=\"like_button\" id=\"like_button_([^\"]*)\">"
+            likeData = re.findall(anotherRegEx2, req )
+
+            if len(likeData) > 0:
+                for imageId in likeData:
+
+                    if hashTagLikeLimit > 0 and hashTagLikes >= hashTagLikeLimit:
                         break
-                    repeat = True
-                    while repeat:
-                        randomint = random.randint(1000,9999)
 
-                        postdata = 'pk='+imageid+'&t='+str(randomint)
-                        buf = cStringIO.StringIO()
-                        c = pycurl.Curl()
-                        c.setopt(pycurl.URL, "http://web.stagram.com/do_like/")
-                        c.setopt(pycurl.COOKIEFILE, "pycookie.txt")
-                        c.setopt(pycurl.COOKIEJAR, "pycookie.txt")
-                        c.setopt(pycurl.WRITEFUNCTION, buf.write)
-                        c.setopt(pycurl.FOLLOWLOCATION, 1)
-                        c.setopt(pycurl.ENCODING, "")
-                        c.setopt(pycurl.SSL_VERIFYPEER, 0)
-                        c.setopt(pycurl.SSL_VERIFYHOST, 0)
-                        useragent = random.choice(browsers) + str(random.randrange(1,9)) + "." + str(random.randrange(0,50)) + " (" + random.choice(operatingsystems) + "; " + random.choice(operatingsystems) + "; rv:" + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + "." + str(random.randrange(1,9)) + ")"
-                        c.setopt(pycurl.USERAGENT, useragent)
-                        c.setopt(pycurl.POST, 1)
-                        c.setopt(pycurl.POSTFIELDS, postdata)
-                        c.setopt(pycurl.POSTFIELDSIZE, len(postdata))
-                        #c.setopt(pycurl.VERBOSE, True)
-                        c.perform()
-                        postData = buf.getvalue()
-                        buf.close()
-                        if postData == '''{"status":"OK","message":"LIKED"}''':
-                            likecount += 1
-                            hashtaglikes += 1
-                            print "You liked #"+tag+" image "+imageid+"! Like count: "+str(likecount)
+                    repeat = True
+
+                    while repeat:
+                        rand = r.randint(1000,9999)
+
+                        postData = "pk={imgId}&t={rand}".format(imgId=imageId, rand=rand)
+                        status = sendReferRequest("http://web.stagram.com/do_like/", "pycookie.txt", 1, "", 0, 0, "", 1, postData, len(postData))
+
+                        print status
+                        if status == '''{"status":"OK","message":"LIKED"}''':
+                            print "You liked #"+tag+" image "+ imageId + "! Like count: "+str(likeCount)
+
                             repeat = False
-                            sleepcount = 0
-                            if sleeptimer > 0:
-                                time.sleep(sleeptimer)
+
+                            likeCount += 1
+                            hashTagLikes += 1
+                            sleepCount = 0
+
+                            # sleep for an hour when you have liked 'maxlike' images
+                            if likeCount > 0 and likeCount == maxLikes:
+                                print "liked " + maxLikes + " times, now going to sleep for an hour"
+                                time.sleep(3600)
+
+                            if sleepTimer > 0:
+                                time.sleep(sleepTimer)
                         else:
-                            sleepcount += 1
-                            print "Your account has been rate limited. Sleeping on "+tag+" for "+str(sleepcount)+" minute(s). Liked "+str(likecount)+" photo(s)..."
+                            sleepCount += 1
+                            print "You've been rate limited. Sleeping on {tag} for {sleepCount} min(s). Liked {likeCount} photo(s)".format(tag=tag, sleepCount=sleepCount, likeCount=likeCount)
                             time.sleep(60)
+
+
+def sendRequest(url, cookieFn, follow, encoding, vPeer, vHost):
+    """
+        send a pycurl request
+    """
+    buf = cStringIO.StringIO()
+
+    c = pycurl.Curl()
+    c.setopt(pycurl.URL, url)
+    c.setopt(pycurl.COOKIEFILE, cookieFn)
+    c.setopt(pycurl.COOKIEJAR, cookieFn)
+    c.setopt(pycurl.WRITEFUNCTION, buf.write)
+    c.setopt(pycurl.FOLLOWLOCATION, follow)
+    c.setopt(pycurl.ENCODING, encoding)
+    c.setopt(pycurl.SSL_VERIFYPEER, vPeer)
+    c.setopt(pycurl.SSL_VERIFYHOST, vHost)
+    c.setopt(pycurl.USERAGENT, randomUserAgent())
+    c.perform()
+
+    curlData = buf.getvalue()
+    buf.close()
+    return curlData
+
+
+def sendReferRequest(url, cookieFn, follow, encoding, vPeer, 
+                     vHost, ref, post, postF, postFs):
+    """
+        send pycurl request with extra options
+    """
+    buf = cStringIO.StringIO()
+    c = pycurl.Curl()
+
+    c.setopt(pycurl.URL, url)
+    c.setopt(pycurl.COOKIEFILE, cookieFn)
+    c.setopt(pycurl.COOKIEJAR, cookieFn)
+    c.setopt(pycurl.WRITEFUNCTION, buf.write)
+    c.setopt(pycurl.FOLLOWLOCATION, follow)
+    c.setopt(pycurl.ENCODING, encoding)
+    c.setopt(pycurl.SSL_VERIFYPEER, vPeer)
+    c.setopt(pycurl.SSL_VERIFYHOST, vHost)
+    c.setopt(pycurl.REFERER, ref)
+    c.setopt(pycurl.USERAGENT, randomUserAgent())
+    c.setopt(pycurl.POST, 1)
+    c.setopt(pycurl.POSTFIELDS, postF)
+    c.setopt(pycurl.POSTFIELDSIZE, postFs)
+    c.perform()
+
+    curlData = buf.getvalue()
+    buf.close()
+    return curlData
+
+
+def getHashTags(fn):
+    """
+        a list of hashtags from a config file
+    """
+    with open(fn) as f:
+        return [tag.strip() for tag in f.readlines()]
+
+
+def randomUserAgent():
+    """
+        a user agent string created from a list of browsers
+    """
+    return "{os1} {vnum1}.{vnum2} ({os2}; {os3}; rv:{v1}.{v2}.{v3}.{v4})".format( os1   = r.choice(browsers),
+                                                                                  vnum1 = str(r.randrange(1,9)),
+                                                                                  vnum2 = str(r.randrange(0,50)),
+                                                                                  os2   = r.choice(operatingSystems),
+                                                                                  os3   = r.choice(operatingSystems),
+                                                                                  v1    = str(r.randrange(1,9)),
+                                                                                  v2    = str(r.randrange(1,9)),
+                                                                                  v3    = str(r.randrange(1,9)),
+                                                                                  v4    = str(r.randrange(1,9)))
 
 def main():
     login()

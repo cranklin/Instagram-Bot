@@ -18,7 +18,7 @@ Instructions:
 - make sure you have the pycurl library installed
 - log into web.stagram.com with your instagram account and approve the app
 - edit between lines 42 and 52
-- from the command line, run "python webstagram.py"
+- from the command line, run "python webstagrambot.py"
 - enjoy!
 
 v1.0 updates:
@@ -29,6 +29,12 @@ v1.0 updates:
 *** thank you Nick, John, Max, Shahar, Charlie for the help
 '''
 
+'''
+Edited by Joel Mackenzie, December 2013.
+Implemented random time delay between likes.
+Tested Dec 22 2013
+'''
+
 import os
 import pycurl
 import cStringIO
@@ -36,14 +42,20 @@ import re
 import random
 import time
 
+#for timing
+random.seed()
+
+
+
 ##### EDIT THESE BELOW
 
 # your instagram username and password
-username = "username"
-password = "password"
+username = "yourusernamehere"
+password = "yourpasswordhere"
 
-#set a sleep timer between each like.  Set value to 0 if you don't want it to sleep at all
-sleeptimer = 5
+#Random interval range. Time between likes will be between upper and lower.
+lower = 17
+upper = 33
 
 #set a like limit per hashtag.  Set value to 0 if you don't want a limit
 hashtaglikelimit = 100
@@ -53,11 +65,14 @@ hashtags = ["love","instagood","me","cute","photooftheday","tbt","instamood","ip
 
 ##### NO NEED TO EDIT BELOW THIS LINE
 
+
+
 browsers = ["IE ","Mozilla/","Gecko/","Opera/","Chrome/","Safari/"]
 operatingsystems = ["Windows","Linux","OS X","compatible","Macintosh","Intel"]
 
 def login():
     try:
+
         os.remove("pycookie.txt")
     except:
         pass
@@ -166,6 +181,7 @@ def like():
             if len(likedata)>0:
                 for imageid in likedata:
                     if hashtaglikelimit > 0 and hashtaglikes >= hashtaglikelimit:
+                        print "breaka"
                         break
                     repeat = True
                     while repeat:
@@ -197,6 +213,10 @@ def like():
                             print "You liked #"+tag+" image "+imageid+"! Like count: "+str(likecount)
                             repeat = False
                             sleepcount = 0
+
+                            #Pulls a random integer out between lower and upper
+                            sleeptimer = random.randint(lower, upper)
+                            print "Waiting " + str(sleeptimer) + " seconds before liking another image\n"
                             if sleeptimer > 0:
                                 time.sleep(sleeptimer)
                         else:

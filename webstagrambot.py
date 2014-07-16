@@ -39,17 +39,17 @@ import time
 ##### EDIT THESE BELOW
 
 # your instagram username and password
-username = "username"
-password = "password"
+username = "daughterphoenix"
+password = "lainax9162"
 
 #set a sleep timer between each like.  Set value to 0 if you don't want it to sleep at all
-sleeptimer = 5
+sleeptimer = 45
 
 #set a like limit per hashtag.  Set value to 0 if you don't want a limit
-hashtaglikelimit = 100
+hashtaglikelimit = 50
 
 #your list of hashtags
-hashtags = ["love","instagood","me","cute","photooftheday","tbt","instamood","iphonesia","picoftheday","igers","girl","beautiful","instadaily","tweegram","summer","instagramhub","follow","bestoftheday","iphoneonly","igdaily","happy","picstitch","webstagram","fashion","sky","nofilter","jj","followme","fun","smile","sun","pretty","instagramers","food","like","friends","lol","hair","nature","swag","onedirection","bored","funny","life","cool","beach","blue","dog","pink","art","hot","my","family","sunset","photo","versagram","instahub","amazing","statigram","girls","cat","awesome","throwbackthursday","repost","clouds","baby","red","music","party","black","instalove","night","textgram","followback","all_shots","jj_forum","igaddict","yummy","white","yum","bestfriend","green","school","likeforlike","eyes","sweet","instago","tagsforlikes","style","harrystyles","2012","foodporn","beauty","ignation","niallhoran","i","boy","nice","halloween","instacollage"]
+hashtags = ["corglife","musicjournalist"]
 
 ##### NO NEED TO EDIT BELOW THIS LINE
 

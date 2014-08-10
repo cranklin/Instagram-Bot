@@ -1,5 +1,9 @@
 Cranklin's Instagram Bot v.1.0
 ==============================
+EDIT
+WORKING INSTAGRAM BOT NOW AT [InstaBot](https://github.com/marclave/InstaBot)
+Contributions welcome :)
+
 Check www.cranklin.com for updates
 
 Instagram bot that auto-likes photos by hashtag.  Written in Python using the Pycurl library.

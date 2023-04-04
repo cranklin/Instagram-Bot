@@ -39,8 +39,8 @@ import time
 ##### EDIT THESE BELOW
 
 # your instagram username and password
-username = "username"
-password = "password"
+username = "_kunaxl__86"
+password = "9833611551"
 
 #set a sleep timer between each like.  Set value to 0 if you don't want it to sleep at all
 sleeptimer = 5
